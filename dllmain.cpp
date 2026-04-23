@@ -38,8 +38,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 }
 
 bool PatchManeuver() {
-	//char* pCall = (char*)0x140e25e5d;
-	char* pCall = (char*)0x140EA5B0E;
+	char* pCall = (char*)0x140EA5DEE;
 	char nops[5] = { 0x90, 0x90, 0x90, 0x90, 0x90 };
 	char expectedBytes[5] = { 0xE8, 0x4D, 0xD0, 0xFF, 0xFF };
 
@@ -55,7 +54,6 @@ bool PatchManeuver() {
 }
 
 /*
-* these are out of date
 bool PatchAxiomRange() {
 	float* pRange = (float*)0x146e22038;
 	if (*(UINT32*)pRange != 1101004800)
@@ -91,4 +89,5 @@ bool PatchAxiomSpeed() {
 	VirtualProtect(pReelDuration, 1024, oldprotect, &oldprotect);
 
 	return true;
-}*/
+}
+*/
