@@ -2,7 +2,16 @@
 #include "dllmain.h"
 #include <windows.h>;
 #include <fstream>;
-#include <iostream>
+#include <iostream>;
+
+enum PatchResult {
+	Unknown,
+	Success,
+	ByteMismatch,
+	FailedWrite,
+	FailedRestore,
+	UnknownException
+};
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
@@ -12,19 +21,33 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     switch (ul_reason_for_call)
     {
 	case DLL_PROCESS_ATTACH: {
-		bool failed = false;
+		PatchResult result = Unknown;
+		LPCWSTR resultStr = L"ImprovedAxiom Maneuver: Unknown Failure - This shouldn't happen!";
 		try {
-			failed = failed || !PatchManeuver();
+			result = PatchManeuver();
 			//failed = failed || !PatchAxiomRange();
-			//log << "AxiomRange patch: " << (failed ? "Failed" : "Success") << std::endl;
 			//failed = failed || !PatchAxiomSpeed();
-			//log << "AxiomSpeed patch: " << (failed ? "Failed" : "Success") << std::endl;
 		} catch(...) {
-			failed = true;
+			result = UnknownException;
+			resultStr = L"ImprovedAxiom Maneuver: An exception was thrown when patching.";
 		}
-		if (failed) {
-			MessageBox(NULL, L"ImprovedAxiom Maneuver failed to patch. Mod is likely out of date.", L"Patch Status", MB_OK | MB_ICONERROR);
-			return FALSE;
+
+		switch (result) {
+			case ByteMismatch:
+				resultStr = L"ImprovedAxiom Maneuver: Byte Mismatch - Mod is likely out of date.";
+				break;
+			case FailedWrite:
+				resultStr = L"ImprovedAxiom Maneuver: Unable to patch - failed to modify page permissions.";
+				break;
+			case FailedRestore:
+				resultStr = L"ImprovedAxiom Maneuver: Failed to restore page permissions. The mod may still work, but this shouldn't happen.";
+				break;
+		}
+
+		if (result != Success) {
+			MessageBox(NULL, resultStr, L"Patch Status", MB_OK | MB_ICONERROR);
+			if (result == FailedRestore)
+				return FALSE;
 		}
 		//log.flush();
 		break;
@@ -37,20 +60,24 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     return TRUE;
 }
 
-bool PatchManeuver() {
-	char* pCall = (char*)0x140EA5DEE;
+PatchResult PatchManeuver() {
+	char* pCall = (char*)0x140E6A0CD;
 	char nops[5] = { 0x90, 0x90, 0x90, 0x90, 0x90 };
-	char expectedBytes[5] = { 0xE8, 0x4D, 0xD0, 0xFF, 0xFF };
+	char expectedBytes[5] = { 0xE8, 0xEE, 0xD1, 0xFF, 0xFF };
 
 	if (memcmp(pCall, expectedBytes, 5) != 0)
-		return false;
+		return ByteMismatch;
 
 	DWORD oldprotect;
-	VirtualProtect(pCall, 1024, PAGE_EXECUTE_READWRITE, &oldprotect);
-	memcpy(pCall, nops, 5);
-	VirtualProtect(pCall, 1024, oldprotect, &oldprotect);
 
-	return true;
+	if (!VirtualProtect(pCall, 5, PAGE_EXECUTE_READWRITE, &oldprotect))
+		return FailedWrite;
+
+	memcpy(pCall, nops, 5);
+	if (!VirtualProtect(pCall, 5, oldprotect, &oldprotect))
+		return FailedRestore;
+
+	return Success;
 }
 
 /*
