@@ -1,7 +1,7 @@
 #pragma once
-enum PatchResult;
+//enum PatchResult;
 
-PatchResult PatchManeuver();
+bool PatchManeuver();
 
 bool PatchAxiomRange();
 
