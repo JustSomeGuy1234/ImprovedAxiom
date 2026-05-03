@@ -28,9 +28,9 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 
 
 bool PatchManeuver() {
-	char* pCall = (char*)0x140E6A0CD;
+	char* pCall = (char*)0x140E69F8D;
 	char nops[5] = { 0x90, 0x90, 0x90, 0x90, 0x90 };
-	char expectedBytes[5] = { 0xE8, 0xEE, 0xD1, 0xFF, 0xFF };
+	char expectedBytes[5] = { 0xE8 ,0xEE, 0xD1, 0xFF, 0xFF};
 
 	if (memcmp(pCall, expectedBytes, 5) != 0)
 		return false;
