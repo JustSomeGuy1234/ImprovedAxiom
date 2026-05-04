@@ -2,12 +2,16 @@
 #include "dllmain.h"
 #include <windows.h>;
 
+void* PMANEUVERCALL = (char*)0x140E69F8D;
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
                        LPVOID lpReserved
                      )
 {
+	if (!CheckMemory())
+		return TRUE;
+
     switch (ul_reason_for_call)
     {
 	case DLL_PROCESS_ATTACH: {
@@ -26,19 +30,26 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     return TRUE;
 }
 
+bool CheckMemory() {
+	// Check that the game is the one loading the ASI,
+	// and not crashpad_handler.exe which is in the same folder.
+	MEMORY_BASIC_INFORMATION* info = new MEMORY_BASIC_INFORMATION;
+	PMEMORY_BASIC_INFORMATION pInfo = info;
+	size_t querySz = VirtualQuery(PMANEUVERCALL, pInfo, sizeof(*info));
+	return (info->State == MEM_COMMIT);
+}
 
 bool PatchManeuver() {
-	char* pCall = (char*)0x140E69F8D;
 	char nops[5] = { 0x90, 0x90, 0x90, 0x90, 0x90 };
 	char expectedBytes[5] = { 0xE8 ,0xEE, 0xD1, 0xFF, 0xFF};
 
-	if (memcmp(pCall, expectedBytes, 5) != 0)
+	if (memcmp(PMANEUVERCALL, expectedBytes, 5) != 0)
 		return false;
 
 	DWORD oldprotect;
-	VirtualProtect(pCall, 5, PAGE_EXECUTE_READWRITE, &oldprotect);
-	memcpy(pCall, nops, 5);
-	VirtualProtect(pCall, 5, oldprotect, &oldprotect);
+	VirtualProtect(PMANEUVERCALL, 5, PAGE_EXECUTE_READWRITE, &oldprotect);
+	memcpy(PMANEUVERCALL, nops, 5);
+	VirtualProtect(PMANEUVERCALL, 5, oldprotect, &oldprotect);
 
 	return true;
 }

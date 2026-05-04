@@ -117,8 +117,7 @@
       <EnableUAC>false</EnableUAC>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(TargetPath)" "C:\Program Files (x86)\Steam\steamapps\common\Crimson Desert\bin64\ImprovedAxiom.asi"
-copy "$(TargetDir)$(ProjectName).pdb" "C:\Program Files (x86)\Steam\steamapps\common\Crimson Desert\bin64\$(ProjectName).pdb"</Command>
+      <Command>copy "$(TargetPath)" "C:\Program Files (x86)\Steam\steamapps\common\Crimson Desert\bin64\ImprovedAxiomManeuver.asi"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -137,6 +136,9 @@ copy "$(TargetDir)$(ProjectName).pdb" "C:\Program Files (x86)\Steam\steamapps\co
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
     </Link>
+    <PostBuildEvent>
+      <Command>copy "$(TargetPath)" "C:\Program Files (x86)\Steam\steamapps\common\Crimson Desert\bin64\ImprovedAxiomManeuver.asi"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="dllmain.h" />
