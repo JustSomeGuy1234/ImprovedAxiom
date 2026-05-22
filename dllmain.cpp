@@ -2,7 +2,7 @@
 #include "dllmain.h"
 #include <windows.h>;
 
-void* PMANEUVERCALL = (char*)0x140E7ED3D;
+void* PMANEUVERCALL = (char*)0x140E91C3D;
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
