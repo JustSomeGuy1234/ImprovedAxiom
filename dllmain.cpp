@@ -2,7 +2,7 @@
 #include "dllmain.h"
 #include <windows.h>;
 
-void* PMANEUVERCALL = (char*)0x1411A9741;
+void* PMANEUVERCALL = (char*)0x141379F6E;
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
@@ -41,7 +41,7 @@ bool CheckMemory() {
 
 bool PatchManeuver() {
 	char nops[5] = { 0x90, 0x90, 0x90, 0x90, 0x90 };
-	char expectedBytes[5] = { 0xE8, 0x7A, 0xCF, 0xFF, 0xFF};
+	char expectedBytes[5] = { 0xE8, 0x6D, 0xCF, 0xFF, 0xFF };
 
 	if (memcmp(PMANEUVERCALL, expectedBytes, 5) != 0)
 		return false;
